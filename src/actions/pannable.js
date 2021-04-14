@@ -6,6 +6,12 @@ const pannable = (node) => {
 		x = clientX;
 		y = clientY;
 
+		node.dispatchEvent(
+			new CustomEvent('panstart', {
+				detail: { x, y }
+			})
+		);
+
 		window.addEventListener('mousemove', handleMouseMove);
 		window.addEventListener('mouseup', handleMouseUp);
 	};
@@ -24,6 +30,12 @@ const pannable = (node) => {
 	};
 
 	const handleMouseUp = () => {
+		node.dispatchEvent(
+			new CustomEvent('panend', {
+				detail: { x, y }
+			})
+		);
+
 		window.removeEventListener('mousemove', handleMouseMove);
 		window.removeEventListener('mouseup', handleMouseUp);
 	};
