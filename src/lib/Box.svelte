@@ -1,22 +1,36 @@
 <script>
+	import { spring } from 'svelte/motion';
 	import pannable from '../actions/pannable.js';
 
     let boxes = [
 		{
 			color: '000000',
 			panning: false,
-			scale: 1,
 			x: 0,
 			y: 0
 		}
 	];
+	let activeBoxIndex = -1;
+
+	let activeBoxScale = spring(1);
+	let activeBoxCoords = spring(
+		{ x: 0, y: 0 },
+		{
+			stiffness: 0.1,
+			damping: 0.25
+		}
+	);
+
 	const handlePanStart = index => {
 		const updatedBox = {
 			...boxes[index],
-			panning: true,
-			scale: 1.2
+			panning: true
 		};
+		activeBoxIndex = index;
 		boxes = getUpdateBoxes(updatedBox, index);
+
+		activeBoxScale.set(1.2);
+		activeBoxCoords.set({ x: updatedBox.x, y: updatedBox.y }, { hard: true });
 	};
 	const handlePan = ({ dx, dy }, index) => {
 		const { x, y } = boxes[index];
@@ -26,14 +40,20 @@
 			y: y + dy
 		};
 		boxes = getUpdateBoxes(updatedBox, index);
+
+		activeBoxCoords.set({ x: updatedBox.x, y: updatedBox.y });
 	};
 	const handlePanEnd = index => {
 		const updatedBox = {
 			...boxes[index],
-			panning: false,
-			scale: 1
+			panning: false
 		};
+		activeBoxIndex = -1;
+
 		boxes = getUpdateBoxes(updatedBox, index);
+
+		activeBoxScale.set(1);
+		activeBoxCoords.set({ x: updatedBox.x, y: updatedBox.y }, { hard: true });
 	};
 	const getRandomColor = () => Math.floor(Math.random() * 16777215).toString(16);
 	const getUpdateBoxes = (updatedBox, index) =>
@@ -50,6 +70,7 @@
 				color: getRandomColor()
 			}
 		];
+		activeBoxCoords.set({ x: 0, y: 0 });
 	};
 	const removeBox = index => {
 		boxes = boxes.filter((_, idx) => idx !== index);
@@ -100,7 +121,7 @@
 <section class="box-container">
 	<button on:click={addBox}>+ Add Box</button>
 
-	{#each boxes as { color, panning, scale, x, y }, i}
+	{#each boxes as { color, panning, x, y }, i}
 		<div
 			class="box"
 			class:panning
@@ -108,7 +129,8 @@
 			on:panstart={() => handlePanStart(i)}
 			on:pan={({ detail }) => handlePan(detail, i)}
 			on:panend={() => handlePanEnd(i)}
-			style="transform: translate({x}px,{y}px) scale({scale}); --bg-color: #{color}">
+			style="transform: translate({activeBoxIndex === i ? $activeBoxCoords.x : x}px,{activeBoxIndex === i ? $activeBoxCoords.y : y}px)
+			scale({activeBoxIndex === i ? $activeBoxScale : 1}); --bg-color: #{color}">
 			<span class="remove" on:click={() => removeBox(i)} />
 			<span class="index">{i}</span>
 		</div>
