@@ -1,5 +1,7 @@
 <script>
 	import { spring } from 'svelte/motion';
+	import { scale } from 'svelte/transition';
+
 	import pannable from '../actions/pannable.js';
 
 	let boxes = [
@@ -141,7 +143,9 @@
 			on:pan={({ detail }) => handlePan(detail, i)}
 			on:panend={() => handlePanEnd(i)}
 			style="transform: translate({activeBoxIndex === i ? $activeBoxCoords.x : x}px,{activeBoxIndex === i ? $activeBoxCoords.y : y}px)
-			scale({activeBoxIndex === i ? $activeBoxScale : 1}); --bg-color: #{color}">
+			scale({activeBoxIndex === i ? $activeBoxScale : 1}); --bg-color: #{color}"
+			in:scale={{ duration: 500 }}
+			out:scale={{ duration: 500 }}>
 			<span class="remove" on:click={() => removeBox(i)} />
 			<span class="index">{i}</span>
 		</div>
