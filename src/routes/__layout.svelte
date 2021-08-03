@@ -34,6 +34,9 @@
 			<li>
 				<a href="/about">About</a>
 			</li>
+			<li>
+				<a href="/action">Svelte Actions</a>
+			</li>
 		</ul>
 	</nav>
 </header>
